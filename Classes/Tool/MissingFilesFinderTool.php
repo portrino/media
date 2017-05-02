@@ -1,17 +1,11 @@
 <?php
 namespace Fab\Media\Tool;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
 use TYPO3\CMS\Core\Resource\ResourceFactory;
@@ -54,7 +48,7 @@ class MissingFilesFinderTool extends AbstractTool
      * @param array $arguments
      * @return string
      */
-    public function work(array $arguments = array())
+    public function work(array $arguments = [])
     {
 
         // Possible clean up of missing files if the User has clicked so.
@@ -65,7 +59,7 @@ class MissingFilesFinderTool extends AbstractTool
         $templateNameAndPath = 'EXT:media/Resources/Private/Standalone/Tool/MissingFilesFinder/WorkResult.html';
         $view = $this->initializeStandaloneView($templateNameAndPath);
 
-        $missingReports = array();
+        $missingReports = [];
         foreach ($this->getStorageRepository()->findAll() as $storage) {
 
             if ($storage->isOnline()) {
@@ -93,7 +87,7 @@ class MissingFilesFinderTool extends AbstractTool
      * @param array $files
      * @return void
      */
-    protected function deleteMissingFilesAction(array $files = array())
+    protected function deleteMissingFilesAction(array $files = [])
     {
 
         foreach ($files as $fileUid) {

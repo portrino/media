@@ -1,17 +1,11 @@
 <?php
 namespace Fab\Media\Command;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
 use TYPO3\CMS\Core\Resource\StorageRepository;
@@ -27,12 +21,12 @@ class DuplicateRecordsCommandController extends CommandController
     /**
      * @var array
      */
-    protected $message = array();
+    protected $message = [];
 
     /**
      * @var array
      */
-    protected $duplicateRecords = array();
+    protected $duplicateRecords = [];
 
     /**
      * @var \TYPO3\CMS\Core\Mail\MailMessage
@@ -50,7 +44,7 @@ class DuplicateRecordsCommandController extends CommandController
         foreach ($this->getStorageRepository()->findAll() as $storage) {
 
             // For the CLI cause.
-            $storage->setEvaluatePermissions(FALSE);
+            $storage->setEvaluatePermissions(false);
 
             $this->printOut();
             $this->printOut(sprintf('%s (%s)', $storage->getName(), $storage->getUid()));
@@ -72,7 +66,7 @@ class DuplicateRecordsCommandController extends CommandController
                     foreach ($duplicateRecords as $identifier => $duplicate) {
 
                         // build temporary array
-                        $uids = array();
+                        $uids = [];
                         foreach ($duplicate as $value) {
                             $uids[] = $value['uid'];
                         }
@@ -153,7 +147,7 @@ class DuplicateRecordsCommandController extends CommandController
     protected function getTo()
     {
 
-        $to = array();
+        $to = [];
 
         // @todo make me more flexible!
         if (!empty($GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailFromAddress'])) {
@@ -171,7 +165,7 @@ class DuplicateRecordsCommandController extends CommandController
     protected function getFrom()
     {
 
-        $from = array();
+        $from = [];
 
         // @todo make me more flexible!
         if (!empty($GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailFromAddress'])) {

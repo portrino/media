@@ -1,21 +1,17 @@
 <?php
 namespace Fab\Media\Security;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
 use Fab\Media\Module\MediaModule;
 use Fab\Media\Module\VidiModule;
+use Fab\Vidi\Module\ModuleLoader;
+use Fab\Vidi\Persistence\ConstraintContainer;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Resource\Folder;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
@@ -36,10 +32,10 @@ class FilePermissionsAspect
      * @param Matcher $matcher
      * @param string $dataType
      * @return void
+     * @throws \InvalidArgumentException
      */
     public function addFilePermissionsForFileStorages(Matcher $matcher, $dataType)
     {
-
         if ($dataType === 'sys_file' && $this->isPermissionNecessary()) {
 
             if ($this->isFolderConsidered()) {
@@ -72,7 +68,7 @@ class FilePermissionsAspect
                 if ($this->getModuleLoader()->hasPlugin() && !$this->getCurrentBackendUser()->isAdmin()) {
 
                     $fileMounts = $this->getCurrentBackendUser()->getFileMountRecords();
-                    $collectedFiles = array();
+                    $collectedFiles = [];
                     foreach ($fileMounts as $fileMount) {
 
                         $combinedIdentifier = $fileMount['base'] . ':' . $fileMount['path'];
@@ -96,16 +92,16 @@ class FilePermissionsAspect
     protected function isPermissionNecessary()
     {
 
-        $isNecessary = TRUE;
+        $isNecessary = true;
 
         $parameters = GeneralUtility::_GET(VidiModule::getParameterPrefix());
 
         if ($parameters['controller'] === 'Clipboard' && ($parameters['action'] === 'show' || $parameters['action'] === 'flush')) {
-            $isNecessary = FALSE;
+            $isNecessary = false;
         }
 
         if ($parameters['controller'] === 'Content' && ($parameters['action'] === 'copyClipboard' || $parameters['action'] === 'moveClipboard')) {
-            $isNecessary = FALSE;
+            $isNecessary = false;
         }
 
         return $isNecessary;
@@ -125,7 +121,7 @@ class FilePermissionsAspect
      */
     protected function getFileUids(Folder $folder)
     {
-        $files = array();
+        $files = [];
         foreach ($folder->getFiles() as $file) {
             $files[] = $file->getUid();
         }
@@ -136,24 +132,29 @@ class FilePermissionsAspect
      * Post-process the constraints object to respect the file mounts.
      *
      * @param Query $query
-     * @param ConstraintInterface|NULL $constraints
-     * @return void
+     * @param ConstraintInterface|null $constraints
+     * @param ConstraintContainer $constraintContainer
+     * @throws \InvalidArgumentException
+     * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception\InvalidNumberOfConstraintsException
      */
-    public function addFilePermissionsForFileMounts(Query $query, $constraints)
+    public function addFilePermissionsForFileMounts(Query $query, $constraints, ConstraintContainer $constraintContainer)
     {
         if ($query->getType() === 'sys_file') {
             if (!$this->getCurrentBackendUser()->isAdmin()) {
-                $this->respectFileMounts($query, $constraints);
+                $this->respectFileMounts($query, $constraints, $constraintContainer);
             }
         }
     }
 
     /**
      * @param Query $query
-     * @param ConstraintInterface|NULL $constraints
+     * @param ConstraintInterface|null $constraints
+     * @param ConstraintContainer $constraintContainer
      * @return array
+     * @throws \InvalidArgumentException
+     * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception\InvalidNumberOfConstraintsException
      */
-    protected function respectFileMounts(Query $query, $constraints)
+    protected function respectFileMounts(Query $query, $constraints, ConstraintContainer $constraintContainer)
     {
 
         $tableName = 'sys_filemounts';
@@ -170,14 +171,15 @@ class FilePermissionsAspect
         );
 
         // Fetch the records.
+        /** @var array $fileMountRecords */
         $fileMountRecords = $this->getDatabaseConnection()->exec_SELECTgetRows(
             'path',
             $tableName,
             $clause
         );
 
-        $constraintsRespectingFileMounts = array();
-        foreach ($fileMountRecords as $fileMountRecord) {
+        $constraintsRespectingFileMounts = [];
+        foreach ((array)$fileMountRecords as $fileMountRecord) {
             if ($fileMountRecord['path']) {
                 $constraintsRespectingFileMounts[] = $query->like(
                     'identifier',
@@ -185,14 +187,21 @@ class FilePermissionsAspect
                 );
             }
         }
-        $constraintsRespectingFileMounts = $query->logicalOr($constraintsRespectingFileMounts);
 
-        $constraints = $query->logicalAnd(
-            $constraints,
-            $constraintsRespectingFileMounts
-        );
+        $logicalOrForRespectingFileMounts = $query->logicalOr($constraintsRespectingFileMounts);
 
-        return array($query, $constraints);
+        if ($constraints) {
+            $constraints = $query->logicalAnd(
+                $constraints,
+                $logicalOrForRespectingFileMounts
+            );
+        } else {
+            $constraints = $logicalOrForRespectingFileMounts;
+        }
+
+        $constraintContainer->setConstraint($constraints);
+
+        return [$query, $constraints, $constraintContainer];
     }
 
     /**
@@ -213,19 +222,21 @@ class FilePermissionsAspect
 
     /**
      * @return MediaModule
+     * @throws \InvalidArgumentException
      */
     protected function getMediaModule()
     {
-        return GeneralUtility::makeInstance('Fab\Media\Module\MediaModule');
+        return GeneralUtility::makeInstance(MediaModule::class);
     }
 
     /**
      * Get the Vidi Module Loader.
      *
-     * @return \Fab\Vidi\Module\ModuleLoader
+     * @return ModuleLoader
+     * @throws \InvalidArgumentException
      */
     protected function getModuleLoader()
     {
-        return GeneralUtility::makeInstance('Fab\Vidi\Module\ModuleLoader');
+        return GeneralUtility::makeInstance(ModuleLoader::class);
     }
 }

@@ -1,19 +1,14 @@
 <?php
 namespace Fab\Media\Command;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
+use Fab\Media\Property\TypeConverter\ConfigurationArrayConverter;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Controller\CommandController;
@@ -25,6 +20,22 @@ class ThumbnailCommandController extends CommandController
 {
 
     /**
+     * @throws \TYPO3\CMS\Extbase\Mvc\Exception\InvalidArgumentTypeException
+     * @throws \TYPO3\CMS\Extbase\Mvc\Exception\NoSuchArgumentException
+     */
+    protected function initializeCommandMethodArguments()
+    {
+        parent::initializeCommandMethodArguments();
+        if ($this->arguments->hasArgument('configuration')) {
+            $propertyMappingConfiguration = $this->arguments->getArgument('configuration')->getPropertyMappingConfiguration();
+            $propertyMappingConfiguration->setTypeConverter(
+                $this->objectManager->get(ConfigurationArrayConverter::class)
+            );
+        }
+    }
+
+
+    /**
      * Generate a bunch of thumbnails in advance to speed up the output of the Media BE module.
      *
      * @param int $limit where to stop in the batch processing.
@@ -33,7 +44,7 @@ class ThumbnailCommandController extends CommandController
      * @param bool $verbose will output a detail result of the thumbnail generation.
      * @return void
      */
-    public function generateCommand($limit = 0, $offset = 0, $configuration = array(), $verbose = FALSE)
+    public function generateCommand($limit = 0, $offset = 0, $configuration = [], $verbose = false)
     {
 
         $this->checkEnvironment();
@@ -50,7 +61,7 @@ class ThumbnailCommandController extends CommandController
             if ($storage->isOnline()) {
 
                 // For the CLI cause.
-                $storage->setEvaluatePermissions(FALSE);
+                $storage->setEvaluatePermissions(false);
 
                 $thumbnailGenerator = $this->getThumbnailGenerator();
                 $thumbnailGenerator

@@ -1,22 +1,18 @@
 <?php
 namespace Fab\Media\Thumbnail;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
 use Fab\Media\Utility\Path;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
+ * Class AudioThumbnailProcessor
  */
 class AudioThumbnailProcessor extends AbstractThumbnailProcessor
 {
@@ -47,7 +43,7 @@ class AudioThumbnailProcessor extends AbstractThumbnailProcessor
     {
 
         $relativePath = sprintf('Icons/MimeType/%s.png', $this->getFile()->getProperty('extension'));
-        $fileNameAndPath = \TYPO3\CMS\Core\Utility\GeneralUtility::getFileAbsFileName('EXT:media/Resources/Public/' . $relativePath);
+        $fileNameAndPath = GeneralUtility::getFileAbsFileName('EXT:media/Resources/Public/' . $relativePath);
         if (!file_exists($fileNameAndPath)) {
             $relativePath = 'Icons/UnknownMimeType.png';
         }
@@ -67,9 +63,10 @@ class AudioThumbnailProcessor extends AbstractThumbnailProcessor
 
         // Variable $result corresponds to an URL in this case.
         // Analyse the URL and compute the adequate separator between arguments.
-        $parameterSeparator = strpos($result, '?') === FALSE ? '?' : '&';
+        $parameterSeparator = strpos($result, '?') === false ? '?' : '&';
 
-        return sprintf('<img src="%s%s" title="%s" alt="%s" %s/>',
+        return sprintf(
+            '<img src="%s%s" title="%s" alt="%s" %s/>',
             $result,
             $this->thumbnailService->getAppendTimeStamp() ? $parameterSeparator . $this->getFile()->getProperty('tstamp') : '',
             $this->getTitle(),
@@ -86,7 +83,7 @@ class AudioThumbnailProcessor extends AbstractThumbnailProcessor
     protected function getTitle()
     {
         $result = $this->getFile()->getProperty('title');
-        if (empty($result)) {
+        if (!$result) {
             $result = $this->getFile()->getName();
         }
         return htmlspecialchars($result);
@@ -103,8 +100,9 @@ class AudioThumbnailProcessor extends AbstractThumbnailProcessor
 
         $file = $this->getFile();
 
-        return sprintf('<a href="%s%s" target="%s" data-uid="%s">%s</a>',
-            $this->thumbnailService->getAnchorUri() ? $this->thumbnailService->getAnchorUri() : $file->getPublicUrl(TRUE),
+        return sprintf(
+            '<a href="%s%s" target="%s" data-uid="%s">%s</a>',
+            $this->thumbnailService->getAnchorUri() ? $this->thumbnailService->getAnchorUri() : $file->getPublicUrl(true),
             $this->thumbnailService->getAppendTimeStamp() ? '?' . $file->getProperty('tstamp') : '',
             $this->thumbnailService->getTarget(),
             $file->getUid(),

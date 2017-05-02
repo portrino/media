@@ -1,17 +1,11 @@
 <?php
 namespace Fab\Media\Index;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
 use TYPO3\CMS\Core\Resource\File;
@@ -31,7 +25,7 @@ class MediaIndexer
     /**
      * @var ResourceStorage
      */
-    protected $storage = NULL;
+    protected $storage = null;
 
     /**
      * @param ResourceStorage $storage
@@ -70,7 +64,7 @@ class MediaIndexer
         }
 
         ksort($newMetaData);
-        $metaData = array();
+        $metaData = [];
         foreach ($newMetaData as $data) {
             $metaData = array_merge($metaData, $data);
         }
@@ -89,7 +83,7 @@ class MediaIndexer
     {
 
         $categoryList = ConfigurationUtility::getInstance()->get('default_categories');
-        $categories = GeneralUtility::trimExplode(',', $categoryList, TRUE);
+        $categories = GeneralUtility::trimExplode(',', $categoryList, true);
 
         foreach ($categories as $category) {
             $values = array(

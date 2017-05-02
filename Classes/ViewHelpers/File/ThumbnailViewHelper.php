@@ -1,17 +1,11 @@
 <?php
 namespace Fab\Media\ViewHelpers\File;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
 use TYPO3\CMS\Core\Resource\File;
@@ -32,12 +26,12 @@ class ThumbnailViewHelper extends AbstractViewHelper
      */
     public function initializeArguments()
     {
-        $this->registerArgument('file', 'TYPO3\CMS\Core\Resource\File|Fab\Vidi\Domain\Model\Content|int', 'The source file', FALSE, NULL);
-        $this->registerArgument('configuration', 'array', 'Configuration to be given for the thumbnail processing.', FALSE, '');
-        $this->registerArgument('attributes', 'array', 'DOM attributes to add to the thumbnail image', FALSE, '');
-        $this->registerArgument('preset', 'string', 'Image dimension preset', FALSE, '');
-        $this->registerArgument('output', 'string', 'Can be: uri, image, imageWrapped', FALSE, 'image');
-        $this->registerArgument('configurationWrap', 'array', 'The configuration given to the wrap.', FALSE, '');
+        $this->registerArgument('file', 'mixed', 'The source file', false, null);
+        $this->registerArgument('configuration', 'array', 'Configuration to be given for the thumbnail processing.', false, []);
+        $this->registerArgument('attributes', 'array', 'DOM attributes to add to the thumbnail image', false, '');
+        $this->registerArgument('preset', 'string', 'Image dimension preset', false, '');
+        $this->registerArgument('output', 'string', 'Can be: uri, image, imageWrapped', false, 'image');
+        $this->registerArgument('configurationWrap', 'array', 'The configuration given to the wrap.', false, '');
     }
 
     /**
@@ -52,6 +46,9 @@ class ThumbnailViewHelper extends AbstractViewHelper
         $file = $this->arguments['file'];
         $preset = $this->arguments['preset'];
         $configuration = $this->arguments['configuration'];
+        if (!is_array($configuration)) {
+            $configuration = array();
+        }
         $configurationWrap = $this->arguments['configurationWrap'];
         $attributes = $this->arguments['attributes'];
         $output = $this->arguments['output'];
@@ -61,13 +58,11 @@ class ThumbnailViewHelper extends AbstractViewHelper
         } elseif (!($file instanceof File)) {
             $file = ResourceFactory::getInstance()->getFileObject((int)$file);
         }
-
         if ($preset) {
             $imageDimension = ImagePresetUtility::getInstance()->preset($preset);
             $configuration['width'] = $imageDimension->getWidth();
             $configuration['height'] = $imageDimension->getHeight();
         }
-
         /** @var $thumbnailService \Fab\Media\Thumbnail\ThumbnailService */
         $thumbnailService = GeneralUtility::makeInstance('Fab\Media\Thumbnail\ThumbnailService', $file);
         $thumbnail = $thumbnailService->setConfiguration($configuration)

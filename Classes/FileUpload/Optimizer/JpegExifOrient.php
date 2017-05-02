@@ -1,17 +1,11 @@
 <?php
 namespace Fab\Media\FileUpload\Optimizer;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
 /**
@@ -61,10 +55,10 @@ class JpegExifOrient
      */
     public static function setOrientation($filename, $orientation)
     {
-        $exif_data = array();    // Buffer
+        $exif_data = [];    // Buffer
         $offsetJfif = 0;
 
-        if (($fh = fopen($filename, 'rb+')) === FALSE) {
+        if (($fh = fopen($filename, 'rb+')) === false) {
             throw new \RuntimeException('Can\'t open ' . $filename, 1363533724);
         }
 
@@ -142,9 +136,9 @@ class JpegExifOrient
 
         // Discover byte order
         if ($exif_data[0] === 0x49 && $exif_data[1] === 0x49) {
-            $is_motorola = FALSE;
+            $is_motorola = false;
         } elseif ($exif_data[0] === 0x4D && $exif_data[1] === 0x4D) {
-            $is_motorola = TRUE;
+            $is_motorola = true;
         } else {
             return;
         }
@@ -189,7 +183,7 @@ class JpegExifOrient
         $offset += 2;
 
         // Search for Orientation Tag in IFD0
-        while (TRUE) {
+        while (true) {
             // Check end of data segment
             if ($offset > $length - 12) return;
             // Get Tag number
@@ -251,7 +245,7 @@ class JpegExifOrient
     protected static function read_1_byte($handle)
     {
         $c = fgetc($handle);
-        if ($c === FALSE) {
+        if ($c === false) {
             throw new \RuntimeException('Premature EOF in JPEG file', 1363533326);
         }
         return ord($c);
@@ -268,11 +262,11 @@ class JpegExifOrient
     protected static function read_2_bytes($handle)
     {
         $c1 = fgetc($handle);
-        if ($c1 === FALSE) {
+        if ($c1 === false) {
             throw new \RuntimeException('Premature EOF in JPEG file', 1363533326);
         }
         $c2 = fgetc($handle);
-        if ($c2 === FALSE) {
+        if ($c2 === false) {
             throw new \RuntimeException('Premature EOF in JPEG file', 1363533326);
         }
         return (ord($c1) << 8) + (ord($c2));

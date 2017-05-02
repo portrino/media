@@ -32,17 +32,17 @@ define([
 		var url = EditStorage.getEditStorageUrl(this.href);
 
 		Vidi.modal = Modal.loadUrl(
-			TYPO3.l10n.localize('action.move'),
+			TYPO3.lang['action.move'],
 			top.TYPO3.Severity.info,
 			[
 				{
-					text: TYPO3.l10n.localize('cancel'),
+					text: TYPO3.lang['cancel'],
 					btnClass: 'btn btn-default',
 					trigger: function() {
 						Modal.dismiss();
 					}
 				}, {
-					text: TYPO3.l10n.localize('action.move'),
+					text: TYPO3.lang['action.move'],
 					btnClass: 'btn btn-default btn-change-storage',
 					trigger: function() {
 						$('#form-change-storage', Vidi.modal).submit();
@@ -57,9 +57,9 @@ define([
 
 				var modalTitle = $('.modal-title', Vidi.modal).html() + ' - ' + numberOfObjects + ' ';
 				if (numberOfObjects > 1) {
-					modalTitle += TYPO3.l10n.localize('records');
+					modalTitle += TYPO3.lang['records'];
 				} else {
-					modalTitle += TYPO3.l10n.localize('record');
+					modalTitle += TYPO3.lang['record'];
 				}
 				$('.modal-title', Vidi.modal).html(modalTitle);
 
@@ -114,7 +114,6 @@ define([
 		getEditStorageUrl: function(url) {
 
 			var uri = new Uri(url);
-			var parametersToKeep = ['iSortCol_0', 'sSortDir_0'];
 
 			if (Vidi.Grid.hasSelectedRows()) {
 				// Case 1: mass editing for selected rows.
@@ -125,16 +124,18 @@ define([
 			} else {
 
 				// Case 2: mass editing for all rows.
-				parametersToKeep.push('sSearch');
-			}
+				var storedParameters = Vidi.Grid.getStoredParameters();
 
-			// Keep only certain parameters which make sense to transmit.
-			for (var index in Vidi.Grid.getStoredParameters()) {
-				var parameter = Vidi.Grid.getStoredParameters()[index];
+				if (typeof storedParameters === 'object') {
 
-				// Keep only certain parameters which make sense to transmit.
-				if ($.inArray(parameter.name, parametersToKeep) > -1) {
-					uri.addQueryParam(parameter.name, parameter.value);
+					if (storedParameters.search) {
+						uri.addQueryParam('search[value]', storedParameters.search.value);
+					}
+
+					if (storedParameters.order) {
+						uri.addQueryParam('order[0][column]', storedParameters.order[0].column);
+						uri.addQueryParam('order[0][dir]', storedParameters.order[0].dir);
+					}
 				}
 			}
 

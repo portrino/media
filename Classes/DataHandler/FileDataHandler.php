@@ -1,20 +1,15 @@
 <?php
 namespace Fab\Media\DataHandler;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
 use Fab\Media\Module\MediaModule;
+use TYPO3\CMS\Core\Resource\DuplicationBehavior;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Fab\Vidi\DataHandler\AbstractDataHandler;
@@ -42,7 +37,7 @@ class FileDataHandler extends AbstractDataHandler
      * Process File with action "remove".
      *
      * @param Content $content
-     * @return bool
+     * @return bool|void
      */
     public function processRemove(Content $content)
     {
@@ -74,9 +69,9 @@ class FileDataHandler extends AbstractDataHandler
             $targetFolder = $this->getMediaModule()->getCurrentFolder();
 
             // Move file
-            $file->copyTo($targetFolder, $file->getName(), 'renameNewFile');
+            $file->copyTo($targetFolder, $file->getName(), DuplicationBehavior::RENAME);
         }
-        return TRUE;
+        return true;
     }
 
     /**
@@ -97,7 +92,7 @@ class FileDataHandler extends AbstractDataHandler
             if ($targetFolder->getIdentifier() !== $file->getParentFolder()->getIdentifier()) {
 
                 // Move file
-                $file->moveTo($targetFolder, $file->getName(), 'renameNewFile');
+                $file->moveTo($targetFolder, $file->getName(), DuplicationBehavior::RENAME);
             }
         } else {
 
@@ -111,13 +106,13 @@ class FileDataHandler extends AbstractDataHandler
 
                 try {
                     // Move file
-                    $file->moveTo($targetFolder, $file->getName(), 'renameNewFile');
+                    $file->moveTo($targetFolder, $file->getName(), DuplicationBehavior::RENAME);
                 } catch (\Exception $e) {
                     $this->errorMessages = $e->getMessage();
                 }
             }
         }
-        return TRUE;
+        return true;
     }
 
     /**

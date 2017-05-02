@@ -1,17 +1,11 @@
 <?php
 namespace Fab\Media\View\Button;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -33,21 +27,24 @@ class EditButton extends AbstractComponentView
      * @param Content $object
      * @return string
      */
-    public function render(Content $object = NULL)
+    public function render(Content $object = null)
     {
         $file = $this->getFileConverter()->convert($object);
         $metadataProperties = $file->_getMetaData();
 
-        $button = $this->makeLinkButton()
-            ->setHref($this->getUri($file))
-            ->setDataAttributes([
-                'uid' => $metadataProperties['uid'],
-                'toggle' => 'tooltip',
-            ])
-            ->setClasses('btn-edit')
-            ->setTitle($this->getLanguageService()->sL('LLL:EXT:media/Resources/Private/Language/locallang.xlf:edit_metadata'))
-            ->setIcon($this->getIconFactory()->getIcon('actions-document-open', Icon::SIZE_SMALL))
-            ->render();
+        $button = '';
+        if ($file->checkActionPermission('write')) {
+            $button = $this->makeLinkButton()
+                ->setHref($this->getUri($file))
+                ->setDataAttributes([
+                    'uid' => $metadataProperties['uid'],
+                    'toggle' => 'tooltip',
+                ])
+                ->setClasses('btn-edit')
+                ->setTitle($this->getLanguageService()->sL('LLL:EXT:media/Resources/Private/Language/locallang.xlf:edit_metadata'))
+                ->setIcon($this->getIconFactory()->getIcon('actions-document-open', Icon::SIZE_SMALL))
+                ->render();
+        }
 
         return $button;
     }
@@ -77,7 +74,7 @@ class EditButton extends AbstractComponentView
     protected function getAdditionalParameters()
     {
 
-        $additionalParameters = array();
+        $additionalParameters = [];
         if (GeneralUtility::_GP('id')) {
             $additionalParameters = array(
                 'id' => urldecode(GeneralUtility::_GP('id')),

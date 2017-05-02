@@ -1,21 +1,17 @@
 <?php
 namespace Fab\Media\Facet;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
+use Fab\Media\TypeConverter\ContentToFileConverter;
 use Fab\Vidi\Domain\Repository\ContentRepositoryFactory;
 use Fab\Vidi\Facet\FacetInterface;
+use Fab\Vidi\Module\ModuleLoader;
 use Fab\Vidi\Persistence\Matcher;
 use Fab\Vidi\Signal\AfterFindContentObjectsSignalArguments;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -58,7 +54,7 @@ class ActionPermissionFacet implements FacetInterface
     /**
      * @var bool
      */
-    protected $canModifyMatcher = FALSE;
+    protected $canModifyMatcher = false;
 
     /**
      * Constructor of a Generic Facet in Vidi.
@@ -68,7 +64,7 @@ class ActionPermissionFacet implements FacetInterface
      * @param array $suggestions
      * @param string $fieldNameAndPath
      */
-    public function __construct($name = '', $label = '', array $suggestions = array(), $fieldNameAndPath = '')
+    public function __construct($name = '', $label = '', array $suggestions = [], $fieldNameAndPath = '')
     {
     }
 
@@ -93,7 +89,7 @@ class ActionPermissionFacet implements FacetInterface
      */
     public function getSuggestions()
     {
-        $suggestions = array();
+        $suggestions = [];
         foreach ($this->suggestions as $key => $label) {
             $suggestions[] = array($key => $this->getLanguageService()->sL($label));
         }
@@ -106,7 +102,7 @@ class ActionPermissionFacet implements FacetInterface
      */
     public function hasSuggestions()
     {
-        return TRUE;
+        return true;
     }
 
     /**
@@ -158,7 +154,7 @@ class ActionPermissionFacet implements FacetInterface
                     $order = $signalArguments->getOrder();
                     $objects = ContentRepositoryFactory::getInstance($this->dataType)->findBy($matcher, $order);
 
-                    $filteredObjects = array();
+                    $filteredObjects = [];
                     foreach ($objects as $object) {
 
                         $file = $this->getFileConverter()->convert($object->getUid());
@@ -176,7 +172,7 @@ class ActionPermissionFacet implements FacetInterface
 
                     // Count number of records
                     $signalArguments->setNumberOfObjects(count($filteredObjects));
-                    $signalArguments->setHasBeenProcessed(TRUE);
+                    $signalArguments->setHasBeenProcessed(true);
                 }
             }
         }
@@ -194,10 +190,10 @@ class ActionPermissionFacet implements FacetInterface
         $parameterPrefix = $this->getModuleLoader()->getParameterPrefix();
         $parameters = GeneralUtility::_GP($parameterPrefix);
 
-        $queryParts = array();
+        $queryParts = [];
         if (!empty($parameters['searchTerm'])) {
             $query = rawurldecode($parameters['searchTerm']);
-            $queryParts = json_decode($query, TRUE);
+            $queryParts = json_decode($query, true);
         }
 
         return $queryParts;
@@ -252,21 +248,23 @@ class ActionPermissionFacet implements FacetInterface
     }
 
     /**
-     * @return \Fab\Media\TypeConverter\ContentToFileConverter
+     * @return ContentToFileConverter
+     * @throws \InvalidArgumentException
      */
     protected function getFileConverter()
     {
-        return GeneralUtility::makeInstance('Fab\Media\TypeConverter\ContentToFileConverter');
+        return GeneralUtility::makeInstance(ContentToFileConverter::class);
     }
 
     /**
      * Get the Vidi Module Loader.
      *
-     * @return \Fab\Vidi\Module\ModuleLoader
+     * @return ModuleLoader
+     * @throws \InvalidArgumentException
      */
     protected function getModuleLoader()
     {
-        return GeneralUtility::makeInstance('Fab\Vidi\Module\ModuleLoader');
+        return GeneralUtility::makeInstance(ModuleLoader::class);
     }
 
 }

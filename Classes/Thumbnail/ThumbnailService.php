@@ -1,17 +1,11 @@
 <?php
 namespace Fab\Media\Thumbnail;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
 use TYPO3\CMS\Core\Resource\File;
@@ -53,7 +47,7 @@ class ThumbnailService
      * @see TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer::Image
      * @var array
      */
-    protected $configuration = array();
+    protected $configuration = [];
 
     /**
      * Define width, height and all sort of attributes to render the anchor file
@@ -62,16 +56,16 @@ class ThumbnailService
      * @see TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer::Image
      * @var array
      */
-    protected $configurationWrap = array();
+    protected $configurationWrap = [];
 
     /**
      * DOM attributes to add to the image preview.
      *
      * @var array
      */
-    protected $attributes = array(
+    protected $attributes = [
         'class' => 'thumbnail',
-    );
+    ];
 
     /**
      * Define in which window will the thumbnail be opened.
@@ -95,7 +89,7 @@ class ThumbnailService
      *
      * @var bool
      */
-    protected $appendTimeStamp = FALSE;
+    protected $appendTimeStamp = false;
 
     /**
      * Define the processing type for the thumbnail.
@@ -110,7 +104,7 @@ class ThumbnailService
      *
      * @param File $file
      */
-    public function __construct(File $file = NULL)
+    public function __construct(File $file = null)
     {
         $this->file = $file;
     }
@@ -120,23 +114,24 @@ class ThumbnailService
      *
      * @throws MissingTcaConfigurationException
      * @return string
+     * @throws \InvalidArgumentException
      */
     public function create()
     {
 
-        if (empty($this->file)) {
+        if (!$this->file) {
             throw new MissingTcaConfigurationException('Missing File object. Forgotten to set a file?', 1355933144);
         }
 
         // Default class name
         $className = 'Fab\Media\Thumbnail\FallBackThumbnailProcessor';
-        if (File::FILETYPE_IMAGE == $this->file->getType()) {
+        if (File::FILETYPE_IMAGE === $this->file->getType()) {
             $className = 'Fab\Media\Thumbnail\ImageThumbnailProcessor';
-        } elseif (File::FILETYPE_AUDIO == $this->file->getType()) {
+        } elseif (File::FILETYPE_AUDIO === $this->file->getType()) {
             $className = 'Fab\Media\Thumbnail\AudioThumbnailProcessor';
-        } elseif (File::FILETYPE_VIDEO == $this->file->getType()) {
+        } elseif (File::FILETYPE_VIDEO === $this->file->getType()) {
             $className = 'Fab\Media\Thumbnail\VideoThumbnailProcessor';
-        } elseif (File::FILETYPE_APPLICATION == $this->file->getType() || File::FILETYPE_TEXT == $this->file->getType()) {
+        } elseif (File::FILETYPE_APPLICATION === $this->file->getType() || File::FILETYPE_TEXT === $this->file->getType()) {
             $className = 'Fab\Media\Thumbnail\ApplicationThumbnailProcessor';
         }
 
@@ -189,11 +184,32 @@ class ThumbnailService
     }
 
     /**
-     * @param array $configuration
+     * @param array|ThumbnailConfiguration $configuration
      * @return $this
      */
     public function setConfiguration($configuration)
     {
+        if ($configuration instanceof ThumbnailConfiguration) {
+            $configurationObject = $configuration;
+            $configuration = [];
+
+            if ($configurationObject->getWidth() > 0) {
+                $configuration['width'] = $configurationObject->getWidth();
+            }
+
+            if ($configurationObject->getHeight() > 0) {
+                $configuration['height'] = $configurationObject->getHeight();
+            }
+
+            if ($configurationObject->getStyle()) {
+                $this->attributes['style'] = $configurationObject->getStyle();
+            }
+
+            if ($configurationObject->getClassName()) {
+                $this->attributes['class'] = $configurationObject->getClassName();
+            }
+        }
+
         $this->configuration = $configuration;
         return $this;
     }

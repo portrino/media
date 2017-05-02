@@ -1,17 +1,11 @@
 <?php
 namespace Fab\Media\Thumbnail;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
 use Fab\Media\Module\MediaModule;
@@ -51,10 +45,10 @@ class ApplicationThumbnailProcessor extends AbstractThumbnailProcessor
     {
         if ($this->isThumbnailPossible($this->getFile()->getExtension())) {
             $this->processedFile = $this->getFile()->process($this->getProcessingType(), $this->getConfiguration());
-            $uri = $this->processedFile->getPublicUrl(TRUE);
+            $uri = $this->processedFile->getPublicUrl(true);
 
             // Update time stamp of processed image at this stage. This is needed for the browser to get new version of the thumbnail.
-            if ($this->processedFile->getProperty('originalfilesha1') != $this->getFile()->getProperty('sha1')) {
+            if ($this->processedFile->getProperty('originalfilesha1') !== $this->getFile()->getProperty('sha1')) {
                 $this->processedFile->updateProperties(array('tstamp' => $this->getFile()->getProperty('tstamp')));
             }
         } else {
@@ -74,9 +68,10 @@ class ApplicationThumbnailProcessor extends AbstractThumbnailProcessor
 
         // Variable $result corresponds to an URL in this case.
         // Analyse the URL and compute the adequate separator between arguments.
-        $parameterSeparator = strpos($result, '?') === FALSE ? '?' : '&';
+        $parameterSeparator = strpos($result, '?') === false ? '?' : '&';
 
-        return sprintf('<img src="%s%s" title="%s" alt="%s" %s/>',
+        return sprintf(
+            '<img src="%s%s" title="%s" alt="%s" %s/>',
             $result,
             $this->thumbnailService->getAppendTimeStamp() ? $parameterSeparator . $this->getTimeStamp() : '',
             $this->getTitle(),
@@ -126,7 +121,8 @@ class ApplicationThumbnailProcessor extends AbstractThumbnailProcessor
             $uri = $this->getUri();
         }
 
-        return sprintf('<a href="%s" target="_blank" data-uid="%s">%s</a>',
+        return sprintf(
+            '<a href="%s" target="_blank" data-uid="%s">%s</a>',
             $uri,
             $this->getFile()->getUid(),
             $result
@@ -139,11 +135,11 @@ class ApplicationThumbnailProcessor extends AbstractThumbnailProcessor
     protected function getUri()
     {
         $urlParameters = array(
-            MediaModule::getParameterPrefix() => array(
+            MediaModule::getParameterPrefix() => [
                 'controller' => 'Asset',
                 'action' => 'download',
                 'file' => $this->getFile()->getUid(),
-            ),
+            ],
         );
         return BackendUtility::getModuleUrl(MediaModule::getSignature(), $urlParameters);
     }
@@ -153,7 +149,7 @@ class ApplicationThumbnailProcessor extends AbstractThumbnailProcessor
      */
     public function getProcessingType()
     {
-        if ($this->thumbnailService->getProcessingType() === NULL) {
+        if ($this->thumbnailService->getProcessingType() === null) {
             return ProcessedFile::CONTEXT_IMAGECROPSCALEMASK;
         }
         return $this->thumbnailService->getProcessingType();

@@ -1,21 +1,22 @@
 <?php
 namespace Fab\Media\Controller;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
+use Fab\Media\Cache\CacheService;
+use Fab\Media\FileUpload\UploadManager;
+use Fab\Media\Index\MediaIndexer;
 use Fab\Media\Module\MediaModule;
+use Fab\Media\TypeConverter\FileConverter;
+use Fab\Media\ViewHelpers\MetadataViewHelper;
+use Fab\Vidi\Service\ContentService;
 use TYPO3\CMS\Core\Page\PageRenderer;
+use TYPO3\CMS\Core\Resource\DuplicationBehavior;
 use TYPO3\CMS\Core\Resource\Exception\ExistingTargetFileNameException;
 use TYPO3\CMS\Core\Resource\Exception\IllegalFileExtensionException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderWritePermissionsException;
@@ -32,6 +33,7 @@ use Fab\Media\Thumbnail\ThumbnailInterface;
 use Fab\Media\Thumbnail\ThumbnailService;
 use Fab\Vidi\Persistence\MatcherObjectFactory;
 use Fab\Vidi\Tca\Tca;
+use TYPO3\CMS\Extbase\SignalSlot\Dispatcher;
 
 /**
  * Controller which handles actions related to Asset.
@@ -46,6 +48,8 @@ class AssetController extends ActionController
 
     /**
      * @throws \Fab\Media\Exception\StorageNotOnlineException
+     * @throws \InvalidArgumentException
+     * @throws \TYPO3\CMS\Extbase\Mvc\Exception\NoSuchArgumentException
      */
     public function initializeAction()
     {
@@ -55,8 +59,8 @@ class AssetController extends ActionController
         // Configure property mapping to retrieve the file object.
         if ($this->arguments->hasArgument('file')) {
 
-            /** @var \Fab\Media\TypeConverter\FileConverter $typeConverter */
-            $typeConverter = $this->objectManager->get('Fab\Media\TypeConverter\FileConverter');
+            /** @var FileConverter $typeConverter */
+            $typeConverter = $this->objectManager->get(FileConverter::class);
 
             $propertyMappingConfiguration = $this->arguments->getArgument('file')->getPropertyMappingConfiguration();
             $propertyMappingConfiguration->setTypeConverter($typeConverter);
@@ -69,8 +73,9 @@ class AssetController extends ActionController
      * @param File $file
      * @param bool $forceDownload
      * @return bool|string
+     * @throws \RuntimeException
      */
-    public function downloadAction(File $file, $forceDownload = FALSE)
+    public function downloadAction(File $file, $forceDownload = false)
     {
 
         if ($file->exists() && $file->getStorage()->isWithinFileMountBoundaries($file->getParentFolder())) {
@@ -78,10 +83,10 @@ class AssetController extends ActionController
             // Emit signal before downloading the file.
             $this->emitBeforeDownloadSignal($file);
 
-            // Read the file and dump it with the flag "forceDownload" set to TRUE or FALSE.
+            // Read the file and dump it with the flag "forceDownload" set to true or false.
             $file->getStorage()->dumpFileContents($file, $forceDownload);
 
-            $result = TRUE;
+            $result = true;
         } else {
             $result = 'Access denied!';
         }
@@ -113,7 +118,7 @@ class AssetController extends ActionController
         }
 
         try {
-            $conflictMode = 'changeName';
+            $conflictMode = DuplicationBehavior::RENAME;
             $fileName = $uploadedFile->getName();
             $file = $targetFolder->addFile($uploadedFile->getFileWithAbsolutePath(), $fileName, $conflictMode);
 
@@ -123,7 +128,7 @@ class AssetController extends ActionController
                 ->applyDefaultCategories($file);
 
             $response = array(
-                'success' => TRUE,
+                'success' => true,
                 'uid' => $file->getUid(),
                 'name' => $file->getName(),
                 'thumbnail' => $this->getThumbnailService($file)->create(),
@@ -154,6 +159,8 @@ class AssetController extends ActionController
      *
      * @param File $file
      * @return string
+     * @throws \InvalidArgumentException
+     * @throws \RuntimeException
      */
     public function updateAction(File $file)
     {
@@ -178,7 +185,7 @@ class AssetController extends ActionController
             $this->getCacheService()->clearCache($file);
 
             $response = array(
-                'success' => TRUE,
+                'success' => true,
                 'uid' => $file->getUid(),
                 'name' => $file->getName(),
                 'thumbnail' => $this->getThumbnailService($file)->create(),
@@ -211,7 +218,7 @@ class AssetController extends ActionController
      * @param array $matches
      * @throws \Exception
      */
-    public function editStorageAction(array $matches = array())
+    public function editStorageAction(array $matches = [])
     {
 
         $this->view->assign('storages', $this->getMediaModule()->getAllowedStorages());
@@ -239,12 +246,13 @@ class AssetController extends ActionController
      * Handle file upload.
      *
      * @return \Fab\Media\FileUpload\UploadedFileInterface|array
+     * @throws \InvalidArgumentException
      */
     protected function handleUpload()
     {
 
-        /** @var $uploadManager \Fab\Media\FileUpload\UploadManager */
-        $uploadManager = GeneralUtility::makeInstance('Fab\Media\FileUpload\UploadManager');
+        /** @var $uploadManager UploadManager */
+        $uploadManager = GeneralUtility::makeInstance(UploadManager::class);
 
         try {
             /** @var $result \Fab\Media\FileUpload\UploadedFileInterface */
@@ -257,23 +265,26 @@ class AssetController extends ActionController
     }
 
     /**
-     * @return \Fab\Media\ViewHelpers\MetadataViewHelper
+     * @return MetadataViewHelper
+     * @throws \InvalidArgumentException
      */
     protected function getMetadataViewHelper()
     {
-        return GeneralUtility::makeInstance('Fab\Media\ViewHelpers\MetadataViewHelper');
+        return GeneralUtility::makeInstance(MetadataViewHelper::class);
     }
 
     /**
      * @param File $file
      * @return ThumbnailService
+     * @throws \Fab\Media\Exception\InvalidKeyInArrayException
+     * @throws \InvalidArgumentException
      */
     protected function getThumbnailService(File $file)
     {
 
         /** @var $thumbnailService ThumbnailService */
-        $thumbnailService = GeneralUtility::makeInstance('Fab\Media\Thumbnail\ThumbnailService', $file);
-        $thumbnailService->setAppendTimeStamp(TRUE)
+        $thumbnailService = GeneralUtility::makeInstance(ThumbnailService::class, $file);
+        $thumbnailService->setAppendTimeStamp(true)
             ->setOutputType(ThumbnailInterface::OUTPUT_IMAGE_WRAPPED);
         return $thumbnailService;
     }
@@ -282,19 +293,21 @@ class AssetController extends ActionController
      * Get the instance of the Indexer service to update the metadata of the file.
      *
      * @param int|ResourceStorage $storage
-     * @return \Fab\Media\Index\MediaIndexer
+     * @return MediaIndexer
+     * @throws \InvalidArgumentException
      */
     protected function getMediaIndexer($storage)
     {
-        return GeneralUtility::makeInstance('Fab\Media\Index\MediaIndexer', $storage);
+        return GeneralUtility::makeInstance(MediaIndexer::class, $storage);
     }
 
     /**
-     * @return \Fab\Media\Cache\CacheService
+     * @return CacheService
+     * @throws \InvalidArgumentException
      */
     protected function getCacheService()
     {
-        return GeneralUtility::makeInstance('Fab\Media\Cache\CacheService');
+        return GeneralUtility::makeInstance(CacheService::class);
     }
 
     /**
@@ -302,6 +315,8 @@ class AssetController extends ActionController
      *
      * @param File $file
      * @return void
+     * @throws \TYPO3\CMS\Extbase\SignalSlot\Exception\InvalidSlotReturnException
+     * @throws \TYPO3\CMS\Extbase\SignalSlot\Exception\InvalidSlotException
      * @signal
      */
     protected function emitBeforeDownloadSignal(File $file)
@@ -312,29 +327,29 @@ class AssetController extends ActionController
     /**
      * Get the SignalSlot dispatcher.
      *
-     * @return \TYPO3\CMS\Extbase\SignalSlot\Dispatcher
+     * @return Dispatcher
      */
     protected function getSignalSlotDispatcher()
     {
-        return $this->objectManager->get('TYPO3\CMS\Extbase\SignalSlot\Dispatcher');
+        return $this->objectManager->get(Dispatcher::class);
     }
 
     /**
-     * Get the Vidi Module Loader.
-     *
-     * @return \Fab\Vidi\Service\ContentService
+     * @return ContentService
+     * @throws \InvalidArgumentException
      */
     protected function getContentService()
     {
-        return GeneralUtility::makeInstance('Fab\Vidi\Service\ContentService', $this->dataType);
+        return GeneralUtility::makeInstance(ContentService::class, $this->dataType);
     }
 
     /**
      * @return MediaModule
+     * @throws \InvalidArgumentException
      */
     protected function getMediaModule()
     {
-        return GeneralUtility::makeInstance('Fab\Media\Module\MediaModule');
+        return GeneralUtility::makeInstance(MediaModule::class);
     }
 
 }

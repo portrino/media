@@ -1,17 +1,11 @@
 <?php
 namespace Fab\Media\FileUpload;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
 use TYPO3\CMS\Core\SingletonInterface;
@@ -26,7 +20,7 @@ class ImageOptimizer implements SingletonInterface
     /**
      * @var array
      */
-    protected $optimizers = array();
+    protected $optimizers = [];
 
     /**
      * @var \TYPO3\CMS\Core\Resource\ResourceStorage
@@ -36,21 +30,22 @@ class ImageOptimizer implements SingletonInterface
     /**
      * Returns a class instance.
      *
-     * @return \Fab\Media\FileUpload\ImageOptimizer
+     * @return ImageOptimizer
+     * @throws \InvalidArgumentException
      * @param \TYPO3\CMS\Core\Resource\ResourceStorage $storage
      */
-    static public function getInstance($storage = NULL)
+    static public function getInstance($storage = null)
     {
-        return GeneralUtility::makeInstance('Fab\Media\FileUpload\ImageOptimizer', $storage);
+        return GeneralUtility::makeInstance(self::class, $storage);
     }
 
     /**
      * Constructor
      *
-     * @return \Fab\Media\FileUpload\ImageOptimizer
+     * @return ImageOptimizer
      * @param \TYPO3\CMS\Core\Resource\ResourceStorage $storage
      */
-    public function __construct($storage = NULL)
+    public function __construct($storage = null)
     {
         $this->storage = $storage;
         $this->add('Fab\Media\FileUpload\Optimizer\Resize');
@@ -87,6 +82,7 @@ class ImageOptimizer implements SingletonInterface
      *
      * @param UploadedFileInterface $uploadedFile
      * @return UploadedFileInterface
+     * @throws \InvalidArgumentException
      */
     public function optimize(UploadedFileInterface $uploadedFile)
     {

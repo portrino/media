@@ -1,18 +1,13 @@
 <?php
 namespace Fab\Media\Thumbnail;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
+
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
@@ -43,27 +38,27 @@ class ThumbnailGenerator
     /**
      * @var array
      */
-    protected $configuration = array();
+    protected $configuration = [];
 
     /**
      * @var ResourceStorage
      */
-    protected $storage = NULL;
+    protected $storage = null;
 
     /**
      * @var Selection
      */
-    protected $selection = NULL;
+    protected $selection = null;
 
     /**
      * @var array
      */
-    protected $resultSet = array();
+    protected $resultSet = [];
 
     /**
      * @var array
      */
-    protected $newProcessedFileIdentifiers = array();
+    protected $newProcessedFileIdentifiers = [];
 
     /**
      * Internal variable
@@ -78,6 +73,10 @@ class ThumbnailGenerator
      * @param int $limit
      * @param int $offset
      * @return void
+     * @throws \TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException
+     * @throws \InvalidArgumentException
+     * @throws \Fab\Media\Exception\InvalidKeyInArrayException
+     * @throws \Fab\Media\Exception\MissingTcaConfigurationException
      */
     public function generate($limit = 0, $offset = 0)
     {
@@ -132,11 +131,11 @@ class ThumbnailGenerator
      */
     protected function isNewProcessedFile()
     {
-        $isNewProcessedFile = FALSE;
+        $isNewProcessedFile = false;
         $lastInsertedId = $this->getDatabaseConnection()->sql_insert_id();
         if ($lastInsertedId > 0 && $lastInsertedId !== $this->lastInsertedProcessedFile) {
             $this->lastInsertedProcessedFile = $lastInsertedId;
-            $isNewProcessedFile = TRUE;
+            $isNewProcessedFile = true;
         }
         return $isNewProcessedFile;
     }
@@ -226,11 +225,12 @@ class ThumbnailGenerator
 
     /**
      * @param File $file
-     * @return \Fab\Media\Thumbnail\ThumbnailService
+     * @return ThumbnailService
+     * @throws \InvalidArgumentException
      */
     protected function getThumbnailService(File $file)
     {
-        return GeneralUtility::makeInstance('Fab\Media\Thumbnail\ThumbnailService', $file);
+        return GeneralUtility::makeInstance(ThumbnailService::class, $file);
     }
 
     /**

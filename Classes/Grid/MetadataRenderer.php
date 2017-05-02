@@ -1,17 +1,11 @@
 <?php
 namespace Fab\Media\Grid;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
 use Fab\Vidi\Grid\ColumnRendererAbstract;
@@ -69,11 +63,11 @@ class MetadataRenderer extends ColumnRendererAbstract
      */
     protected function hasHtml($content)
     {
-        $result = FALSE;
+        $result = false;
 
         // We compare the length of the string with html tags and without html tags.
         if (strlen($content) != strlen(strip_tags($content))) {
-            $result = TRUE;
+            $result = true;
         }
         return $result;
     }
@@ -88,7 +82,7 @@ class MetadataRenderer extends ColumnRendererAbstract
     {
 
         // @todo implement me!
-        $result = TRUE;
+        $result = true;
         return $result;
     }
 

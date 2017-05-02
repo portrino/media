@@ -1,17 +1,11 @@
 <?php
 namespace Fab\Media\Cache;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -78,7 +72,7 @@ class CacheService
         /** @var $processedFile \TYPO3\CMS\Core\Resource\ProcessedFile */
         foreach ($this->getProcessedFileRepository()->findAllByOriginalFile($file) as $processedFile) {
             if ($processedFile->exists()) {
-                $processedFile->delete(TRUE);
+                $processedFile->delete(true);
             }
             $this->getDatabaseConnection()->exec_DELETEquery('sys_file_processedfile', 'uid=' . (int)$processedFile->getUid());
         }
@@ -105,7 +99,7 @@ class CacheService
 
         /** @var $tce \TYPO3\CMS\Core\DataHandling\DataHandler */
         $tce = GeneralUtility::makeInstance('TYPO3\CMS\Core\DataHandling\DataHandler');
-        $tce->start(array(), array());
+        $tce->start([], []);
 
         #$pages = array_merge(
         #    $this->findPagesWithFileReferences($file),
@@ -137,7 +131,7 @@ class CacheService
         );
 
         // Compute result
-        $pages = array();
+        $pages = [];
         while ($affectedPage = $this->getDatabaseConnection()->sql_fetch_assoc($rows)) {
             $pages[] = $affectedPage['pid'];
         }
@@ -172,7 +166,7 @@ class CacheService
         );
 
         // Compute result
-        $pages = array();
+        $pages = [];
         while ($affectedPage = $this->getDatabaseConnection()->sql_fetch_assoc($rows)) {
             $pages[] = $affectedPage['pid'];
         }

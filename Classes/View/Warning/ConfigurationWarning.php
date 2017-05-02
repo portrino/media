@@ -1,17 +1,11 @@
 <?php
 namespace Fab\Media\View\Warning;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
 use Fab\Media\Module\MediaModule;
@@ -28,7 +22,7 @@ class ConfigurationWarning extends AbstractComponentView
     /**
      * @var array
      */
-    protected $notAllowedMountPoints = array();
+    protected $notAllowedMountPoints = [];
 
     /**
      * Renders a button for uploading assets.
@@ -93,7 +87,7 @@ class ConfigurationWarning extends AbstractComponentView
             'extension_allowed_file_type_5',
         );
 
-        $values = array();
+        $values = [];
         foreach ($fields as $field) {
             $values[$field] = Tca::table($tableName)->field($field)->getDefaultValue();
         }
@@ -130,12 +124,6 @@ class ConfigurationWarning extends AbstractComponentView
 
         // Take the storage fields and check whether some data was initialized.
         $fields = array(
-            'mount_point_file_type_1',
-            'mount_point_file_type_2',
-            'mount_point_file_type_3',
-            'mount_point_file_type_4',
-            'mount_point_file_type_5',
-            'maximum_dimension_original_image',
             'extension_allowed_file_type_1',
             'extension_allowed_file_type_2',
             'extension_allowed_file_type_3',
@@ -143,11 +131,11 @@ class ConfigurationWarning extends AbstractComponentView
             'extension_allowed_file_type_5',
         );
 
-        $result = TRUE;
+        $result = true;
         foreach ($fields as $fieldName) {
-            // TRUE means the storage has data and thus was configured / saved once.
+            // true means the storage has data and thus was configured / saved once.
             if (!empty($storageRecord[$fieldName])) {
-                $result = FALSE;
+                $result = false;
                 break;
             }
         }
@@ -162,14 +150,16 @@ class ConfigurationWarning extends AbstractComponentView
     protected function formatMessageForStorageConfigured()
     {
 
+        // TODO: after dropping typo3 7.6 support, remove class: typo3-message message-warning message-header message-body
+
         $storage = $this->getMediaModule()->getCurrentStorage();
 
         $result = <<< EOF
-			<div class="typo3-message message-information">
-				<div class="message-header">
+			<div class="typo3-message message-information alert alert-info">
+				<div class="message-header alert-title">
 						Storage has been configured.
 				</div>
-				<div class="message-body">
+				<div class="message-body alert-message">
 					The storage "{$storage->getName()}" was not configured for Media. Some default values have automatically been added.
 					To see those values, open the storage record "{$storage->getName()}" ({$storage->getUid()})
 					and check under tab "Upload Settings" or "Default mount points".
@@ -197,15 +187,16 @@ EOF;
      */
     protected function formatMessageForStorageOffline()
     {
+        // TODO: after dropping typo3 7.6 support, remove class: typo3-message message-warning message-header message-body
 
         $storage = $this->getMediaModule()->getCurrentStorage();
 
         $result = <<< EOF
-			<div class="typo3-message message-warning">
-					<div class="message-header">
+			<div class="typo3-message message-warning alert alert-warning">
+					<div class="message-header alert-title">
 						Storage is currently offline
 				</div>
-					<div class="message-body">
+					<div class="message-body alert-message">
 						The storage "{$storage->getName()}" looks currently to be off-line. Contact an administrator if you think this is an error.
 					</div>
 				</div>
@@ -226,7 +217,7 @@ EOF;
 
             $fileMounts = $this->getBackendUser()->getFileMountRecords();
 
-            $fileMountIdentifiers = array();
+            $fileMountIdentifiers = [];
             foreach ($fileMounts as $fileMount) {
                 $fileMountIdentifiers[] = $fileMount['uid'];
             }
@@ -284,11 +275,11 @@ EOF;
         }
 
         $result = <<< EOF
-			<div class="typo3-message message-warning">
-					<div class="message-header">
+			<div class="typo3-message message-warning alert alert-warning">
+					<div class="message-header alert-title">
 						File mount are wrongly configured for user "{$backendUser->user['username']}".
 				</div>
-					<div class="message-body">
+					<div class="message-body alert-message">
 						User "{$backendUser->user['username']}" has no access to the following mount point configured in storage "{$storage->getName()}":
 						<ul>
 						{$list}
@@ -332,11 +323,11 @@ EOF;
     {
 
         $result = <<< EOF
-			<div class="typo3-message message-ok">
-				<div class="message-header">
+			<div class="typo3-message message-ok alert alert-success">
+				<div class="message-header alert-title">
 						Initialized column "number_of_references" for ${numberOfFile} files
 				</div>
-				<div class="message-body">
+				<div class="message-body alert-message">
 					The column "sys_file.number_of_references" is used as a caching column for storing the total number of usage of a file.
 					It is required when searching files by "usage" in the visual search bar. For example searching for files with 0 usage,
 					corresponds to file that are not used on the Frontend,
@@ -361,11 +352,11 @@ EOF;
     {
 
         $result = <<< EOF
-			<div class="typo3-message message-warning">
-				<div class="message-header">
+			<div class="typo3-message message-warning alert alert-warning">
+				<div class="message-header alert-title">
 						Column "number_of_references" requires to be initialized.
 				</div>
-				<div class="message-body">
+				<div class="message-body alert-message">
 				    This action can not be done automatically as there are more than 2000 files. <br/>
 
 					The column "number_of_references" in "sys_file" is used as a caching column for storing the total number of usage of a file.

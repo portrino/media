@@ -1,17 +1,11 @@
 <?php
 namespace Fab\Media\Index;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
 use TYPO3\CMS\Core\Resource\File;
@@ -34,7 +28,7 @@ class TitleMetadataExtractor implements ExtractorInterface
      */
     public function getFileTypeRestrictions()
     {
-        return array();
+        return [];
     }
 
     /**
@@ -49,7 +43,7 @@ class TitleMetadataExtractor implements ExtractorInterface
      */
     public function getDriverRestrictions()
     {
-        return array();
+        return [];
     }
 
     /**
@@ -84,7 +78,7 @@ class TitleMetadataExtractor implements ExtractorInterface
      */
     public function canProcess(File $file)
     {
-        return TRUE;
+        return true;
     }
 
     /**
@@ -95,9 +89,9 @@ class TitleMetadataExtractor implements ExtractorInterface
      * @param array $previousExtractedData optional, contains the array of already extracted data
      * @return array
      */
-    public function extractMetaData(File $file, array $previousExtractedData = array())
+    public function extractMetaData(File $file, array $previousExtractedData = [])
     {
-        $metadata = array();
+        $metadata = [];
         $title = $file->getProperty('title');
         if (empty($title)) {
             $metadata = array('title' => $this->guessTitle($file->getName()));

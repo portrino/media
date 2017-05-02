@@ -1,17 +1,11 @@
 <?php
 namespace Fab\Media\Controller;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
 use TYPO3\CMS\Core\Resource\File;
@@ -49,12 +43,12 @@ class ProcessedFileController extends ActionController
      * @param array $processingConfiguration
      * @return string
      */
-    public function createAction(File $file, array $processingConfiguration = array())
+    public function createAction(File $file, array $processingConfiguration = [])
     {
         $processedFile = $file->process(ProcessedFile::CONTEXT_IMAGECROPSCALEMASK, $processingConfiguration);
 
         $response = array(
-            'success' => TRUE,
+            'success' => true,
             'original' => $file->getUid(),
             'title' => $file->getProperty('title') ? $file->getProperty('title') : $file->getName(),
             'publicUrl' => $processedFile->getPublicUrl(),

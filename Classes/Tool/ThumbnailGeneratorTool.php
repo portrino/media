@@ -1,17 +1,11 @@
 <?php
 namespace Fab\Media\Tool;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Resource\StorageRepository;
@@ -53,10 +47,10 @@ class ThumbnailGeneratorTool extends AbstractTool
      * @param array $arguments
      * @return string
      */
-    public function work(array $arguments = array())
+    public function work(array $arguments = [])
     {
 
-        $reports = array();
+        $reports = [];
 
         $limit = 500; // default value
         $newOffset = 0;
@@ -76,7 +70,7 @@ class ThumbnailGeneratorTool extends AbstractTool
                         ->setStorage($storage)
                         ->generate($limit, $offset);
 
-                    $formattedResultSet = array();
+                    $formattedResultSet = [];
                     $resultSet = $thumbnailGenerator->getResultSet();
                     $processedFileIdentifiers = $thumbnailGenerator->getNewProcessedFileIdentifiers();
 
@@ -91,7 +85,7 @@ class ThumbnailGeneratorTool extends AbstractTool
 
                     $reports[] = array(
                         'storage' => $storage,
-                        'isStorageOnline' => TRUE,
+                        'isStorageOnline' => true,
                         'resultSet' => $formattedResultSet,
                         'numberOfProcessedFiles' => $thumbnailGenerator->getNumberOfProcessedFiles(),
                         'numberOfTraversedFiles' => $thumbnailGenerator->getNumberOfTraversedFiles(),
@@ -101,7 +95,7 @@ class ThumbnailGeneratorTool extends AbstractTool
                 } else {
                     $reports[] = array(
                         'storage' => $storage,
-                        'isStorageOnline' => FALSE,
+                        'isStorageOnline' => false,
                     );
                 }
             }

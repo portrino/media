@@ -1,17 +1,11 @@
 <?php
 namespace Fab\Media\Utility;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
 use Fab\Media\Module\MediaModule;
@@ -29,11 +23,12 @@ class PermissionUtility implements SingletonInterface
     /**
      * Returns a class instance.
      *
-     * @return \Fab\Media\Utility\PermissionUtility
+     * @return PermissionUtility
+     * @throws \InvalidArgumentException
      */
     static public function getInstance()
     {
-        return GeneralUtility::makeInstance('Fab\Media\Utility\PermissionUtility');
+        return GeneralUtility::makeInstance(PermissionUtility::class);
     }
 
     /**
@@ -41,8 +36,9 @@ class PermissionUtility implements SingletonInterface
      *
      * @param null|int|ResourceStorage $storage
      * @return array
+     * @throws \InvalidArgumentException
      */
-    public function getAllowedExtensions($storage = NULL)
+    public function getAllowedExtensions($storage = null)
     {
 
         $fieldNames = array(
@@ -62,9 +58,9 @@ class PermissionUtility implements SingletonInterface
         }
 
         $storageRecord = $storage->getStorageRecord();
-        $allowedExtensions = array();
+        $allowedExtensions = [];
         foreach ($fieldNames as $fieldName) {
-            $_allowedExtensions = GeneralUtility::trimExplode(',', $storageRecord[$fieldName], TRUE);
+            $_allowedExtensions = GeneralUtility::trimExplode(',', $storageRecord[$fieldName], true);
             $allowedExtensions = array_merge($allowedExtensions, $_allowedExtensions);
         }
 
@@ -76,6 +72,7 @@ class PermissionUtility implements SingletonInterface
      * Returns allowed extensions list.
      *
      * @return string
+     * @throws \InvalidArgumentException
      */
     public function getAllowedExtensionList()
     {
@@ -84,10 +81,11 @@ class PermissionUtility implements SingletonInterface
 
     /**
      * @return MediaModule
+     * @throws \InvalidArgumentException
      */
     protected function getMediaModule()
     {
-        return GeneralUtility::makeInstance('Fab\Media\Module\MediaModule');
+        return GeneralUtility::makeInstance(MediaModule::class);
     }
 
 }

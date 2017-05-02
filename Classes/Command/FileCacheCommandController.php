@@ -1,17 +1,11 @@
 <?php
 namespace Fab\Media\Command;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
 use FilesystemIterator;
@@ -56,14 +50,14 @@ class FileCacheCommandController extends CommandController
                 $this->outputLine('--------------------------------------------');
                 $this->outputLine();
 
-                #$storage->getProcessingFolder()->delete(TRUE); // will not work
+                #$storage->getProcessingFolder()->delete(true); // will not work
 
                 // Well... not really FAL friendly but straightforward for Local drivers.
                 $processedDirectoryPath = PATH_site . $storage->getProcessingFolder()->getPublicUrl();
                 $fileIterator = new FilesystemIterator($processedDirectoryPath, FilesystemIterator::SKIP_DOTS);
                 $numberOfProcessedFiles = iterator_count($fileIterator);
 
-                GeneralUtility::rmdir($processedDirectoryPath, TRUE);
+                GeneralUtility::rmdir($processedDirectoryPath, true);
                 GeneralUtility::mkdir($processedDirectoryPath); // recreate the directory.
 
                 $message = sprintf('Done! Removed %s processed file(s).', $numberOfProcessedFiles);

@@ -1,17 +1,11 @@
 <?php
 namespace Fab\Media\FileUpload;
 
-/**
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+/*
+ * This file is part of the Fab/Media project under GPLv2 or later.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE.md file that was distributed with this source code.
  */
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -58,7 +52,7 @@ class Base64File extends \Fab\Media\FileUpload\UploadedFileAbstract
         if (preg_match('/^data:image\/(jpg|jpeg|png)/i', $encodedImage, $matches)) {
             $this->extension = $matches[1];
         } else {
-            return FALSE;
+            return false;
         }
 
         // Remove the mime-type header
@@ -68,7 +62,7 @@ class Base64File extends \Fab\Media\FileUpload\UploadedFileAbstract
         $this->image = base64_decode($data, true);
 
         if (!$this->image) {
-            return FALSE;
+            return false;
         }
 
         $this->setName(uniqid() . '.' . $this->extension);
@@ -78,7 +72,7 @@ class Base64File extends \Fab\Media\FileUpload\UploadedFileAbstract
      * Save the file to the specified path
      *
      * @throws \Fab\Media\Exception\EmptyPropertyException
-     * @return boolean TRUE on success
+     * @return boolean true on success
      */
     public function save()
     {
@@ -122,7 +116,7 @@ class Base64File extends \Fab\Media\FileUpload\UploadedFileAbstract
     /**
      * Get MIME type of file.
      *
-     * @return string|boolean MIME type. eg, text/html, FALSE on error
+     * @return string|boolean MIME type. eg, text/html, false on error
      */
     public function getMimeType()
     {
@@ -133,6 +127,6 @@ class Base64File extends \Fab\Media\FileUpload\UploadedFileAbstract
         } elseif (function_exists('mime_content_type')) {
             return mime_content_type($this->getFileWithAbsolutePath());
         }
-        return FALSE;
+        return false;
     }
 }
