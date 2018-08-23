@@ -14,6 +14,7 @@ namespace Fab\Media\View\Button;
  * The TYPO3 project - inspiring people to share!
  */
 
+use Fab\Media\Module\MediaModule;
 use TYPO3\CMS\Backend\Utility\IconUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Fab\Vidi\View\AbstractComponentView;
@@ -58,6 +59,7 @@ class DeleteButton extends AbstractComponentView {
 				'controller' => 'Content',
 				'action' => 'delete',
 				'format' => 'json',
+				'hasRecursiveSelection' => $this->getMediaModule()->hasRecursiveSelection(),
 				'matches' => array(
 					'uid' => $object->getUid(),
 				),
@@ -80,4 +82,10 @@ class DeleteButton extends AbstractComponentView {
 		return GeneralUtility::makeInstance('Fab\Media\TypeConverter\ContentToFileConverter');
 	}
 
+    /**
+     * @return MediaModule
+     */
+    protected function getMediaModule() {
+        return GeneralUtility::makeInstance('Fab\Media\Module\MediaModule');
+    }
 }
